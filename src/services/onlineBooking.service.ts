@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-const BOOKING_API_BASE_URL = "http://localhost:3000/api/online";
+const BOOKING_API_BASE_URL = "https://api.shoebooking.techtiken.app/api/online";
 
 const locationSchema = z.object({
   id: z.number(),
