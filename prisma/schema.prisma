@@ -1,0 +1,67 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum ConversationStatus {
+  active
+  completed
+  cancelled
+  expired
+}
+
+enum MessageDirection {
+  inbound
+  outbound
+}
+
+model Conversation {
+  id            String             @id @default(cuid())
+  phoneNumber   String
+  flowId        String
+  flowVersion   Int
+  status        ConversationStatus @default(active)
+  currentStep   String
+  contextJson   Json
+  startedAt     DateTime
+  lastMessageAt DateTime
+  expiresAt     DateTime?
+  completedAt   DateTime?
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+  messages      Message[]
+
+  @@index([phoneNumber, status])
+}
+
+model Message {
+  id                String            @id @default(cuid())
+  conversationId    String?
+  direction         MessageDirection
+  provider          String
+  providerMessageId String?
+  fromNumber        String
+  toNumber          String
+  body              String
+  rawPayload        Json
+  createdAt         DateTime          @default(now())
+  conversation      Conversation?     @relation(fields: [conversationId], references: [id], onDelete: SetNull)
+
+  @@unique([provider, providerMessageId])
+}
+
+model OptOut {
+  id          String   @id @default(cuid())
+  phoneNumber String   @unique
+  reason      String
+  createdAt   DateTime @default(now())
+}
